@@ -144,8 +144,11 @@ fi
 ${PAYARA_HOME}/bin/asadmin stop-domain --domaindir ${DOMAINS_HOME}
 chown -R ${USER_NAME}:${USER_NAME} ${DOMAIN_DIR}
 
-#LOGBACK logger
-sed -i 's|<!-- <appender-ref ref="EMAIL_ERROR" /> -->|<appender-ref ref="EMAIL_ERROR" />|g' ${DOMAIN_DIR}/config/logback.xml
+# LOGBACK logger
+#  enable email sending when recipient is not empty
+if [[ ! -z "${LOG_RECIPIENT_ADDRESS}" ]]; then
+    sed -i 's|<!-- <appender-ref ref="EMAIL_ERROR" /> -->|<appender-ref ref="EMAIL_ERROR" />|g' ${DOMAIN_DIR}/config/logback.xml
+fi
 sed -i 's|<subject>SORMAS: %logger{20} - %m</subject>|<!-- <subject>SORMAS: %logger{20} - %m</subject> -->|g' ${DOMAIN_DIR}/config/logback.xml
 sed -i 's|<smtpHost>localhost</smtpHost>|\t<smtpHost>MAIL_HOST</smtpHost>\n\t\t<smtpPort>SMTP_PORT</smtpPort>\n\t\t<username>SMTP_USER</username>\n\t\t<password>SMTP_PASSWORD</password>\n\t\t<STARTTLS>SMTP_STARTTLS</STARTTLS>\n\t\t<SSL>SMTP_SSL</SSL>\n\t\t<asynchronousSending>SMTP_ASYNC_SENDING</asynchronousSending>\n\t\t<to>LOG_RECIPIENT_ADDRESS</to>\n\t\t<from>LOG_SENDER_ADDRESS</from>\n\t\t<subject>LOG_SUBJECT</subject>|g' ${DOMAIN_DIR}/config/logback.xml
 sed -i "s/MAIL_HOST/$MAIL_HOST/" ${DOMAIN_DIR}/config/logback.xml
